@@ -1,0 +1,16 @@
+python3 engine.py --server-port 80 --strategy "[TCP:flags:SA]-tamper{TCP:window:replace:0}-|" --log debug --server-side
+
+python3 engine.py --server-port 80 --strategy "[TCP:flags:A]-tamper{TCP:window:replace:0}-|" --log debug --in-queue-num 3 --out-queue-num 4 --server-side
+
+python3 engine.py --server-port 80 --strategy "[TCP:flags:PA]-tamper{TCP:window:replace:0}-|" --log debug --in-queue-num 5 --out-queue-num 6 --server-side
+
+python3 engine.py --server-port 80 --strategy "[TCP:flags:FA]-tamper{TCP:window:replace:0}-|" --log debug --in-queue-num 7 --out-queue-num 8 --server-side
+
+全部启动后
+
+iptables -F
+
+iptables -A OUTPUT -p tcp --sport 80 --tcp-flags SYN,RST,ACK,FIN,PSH SYN,ACK -j NFQUEUE --queue-num 2
+iptables -A OUTPUT -p tcp --sport 80 --tcp-flags SYN,RST,ACK,FIN,PSH ACK -j NFQUEUE --queue-num 4
+iptables -A OUTPUT -p tcp --sport 80 --tcp-flags SYN,RST,ACK,FIN,PSH PSH,ACK -j NFQUEUE --queue-num 6
+iptables -A OUTPUT -p tcp --sport 80 --tcp-flags SYN,RST,ACK,FIN,PSH FIN,ACK -j NFQUEUE --queue-num 8
